@@ -18,36 +18,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.moneyapi.moneyapi.model.Categoria;
-import com.moneyapi.moneyapi.repository.Categorias;
+import com.moneyapi.moneyapi.model.Pessoa;
+import com.moneyapi.moneyapi.repository.Pessoas;
 
 @RestController
-@RequestMapping("/categorias")
-public class CategoriaController {
+@RequestMapping("/pessoas")
+public class PessoaController {
 
 	@Autowired
-	private Categorias bd;
+	private Pessoas bd;
 	
 	@GetMapping
-	public List<Categoria> listar(){
+	public List<Pessoa> listar(){
 		return bd.findAll();
 	}
 	
 	@PostMapping	
-	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
-		Categoria retorno = bd.save(categoria);
+	public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
+		Pessoa retorno = bd.save(pessoa);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}").buildAndExpand(retorno.getCodigo()).toUri();
 		response.setHeader("Location", uri.toASCIIString());
 		return ResponseEntity.created(uri).body(retorno);
 	}
 	
 	@GetMapping("/{codigo}")
-	public Optional<Categoria> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
-		Optional<Categoria> retorno =  bd.findById(codigo);
+	public Optional<Pessoa> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
+		Optional<Pessoa> retorno =  bd.findById(codigo);
 		if(retorno.equals(Optional.empty())) {					
 			ResponseEntity.notFound().build();
-		}		
-		
+		}				
 		return retorno;
 	}
 	
