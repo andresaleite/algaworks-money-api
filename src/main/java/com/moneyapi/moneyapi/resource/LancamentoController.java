@@ -9,7 +9,6 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,38 +23,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.moneyapi.moneyapi.evento.RecursoAlteradoEvent;
 import com.moneyapi.moneyapi.evento.RecursoCriadoEvent;
-import com.moneyapi.moneyapi.model.Pessoa;
-import com.moneyapi.moneyapi.repository.Pessoas;
+import com.moneyapi.moneyapi.model.Lancamento;
+import com.moneyapi.moneyapi.repository.Lancamentos;
 
 @RestController
-@RequestMapping("/pessoas")
-public class PessoaController {
+@RequestMapping("/lancamentos")
+public class LancamentoController {
 
 	@Autowired
-	private Pessoas bd;
+	private Lancamentos bd;
 	
 	@Autowired
 	private ApplicationEventPublisher publicador;
 	
 	@GetMapping
-	public List<Pessoa> listar(){
+	public List<Lancamento> listar(){
 		return bd.findAll();
 	}
 	
-	@PostMapping	
-	public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-		Pessoa retorno = bd.save(pessoa);
-		publicador.publishEvent(new RecursoCriadoEvent(this, response, pessoa.getCodigo()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(retorno);
-	}
 	
 	@GetMapping("/{codigo}")
-	public Optional<Pessoa> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
-		Optional<Pessoa> retorno =  bd.findById(codigo);
+	public Optional<Lancamento> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
+		Optional<Lancamento> retorno =  bd.findById(codigo);
 		if(retorno.equals(Optional.empty())) {					
 			ResponseEntity.notFound().build();
 		}				
 		return retorno;
+	}
+	
+	@PostMapping
+	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
+		Lancamento retorno = bd.save(lancamento);
+		publicador.publishEvent(new RecursoCriadoEvent(this, response, lancamento.getCodigo()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(retorno);
 	}
 	
 	@DeleteMapping("/{codigo}")
@@ -65,23 +65,10 @@ public class PessoaController {
 	}
 	
 	@PutMapping("/{codigo}")
-	public ResponseEntity<Pessoa> alterar(@PathVariable Long codigo,@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-			
-		pessoa.setCodigo(codigo);
-		bd.saveAndFlush(pessoa);
-		publicador.publishEvent(new RecursoAlteradoEvent(this, response, pessoa.getCodigo()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(pessoa);
+	public ResponseEntity<Lancamento> alterar(@PathVariable Long codigo,@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
+		lancamento.setCodigo(codigo);
+		bd.saveAndFlush(lancamento);
+		publicador.publishEvent(new RecursoAlteradoEvent(this, response, lancamento.getCodigo()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(lancamento);
 	}
-	
-	@PutMapping("/{codigo}/{ativo}")
-	public void alterarAtivo(@PathVariable Long codigo,@PathVariable boolean ativo) {
-		Optional<Pessoa> p = bd.findById(codigo);
-		if(p.equals(Optional.empty()))
-		throw new EmptyResultDataAccessException(1);
-		
-		p.get().setCodigo(codigo);
-		p.get().setAtivo(ativo);		
-		bd.saveAndFlush(p.get());
-	}
-	
 }
