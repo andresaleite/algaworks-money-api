@@ -25,17 +25,22 @@ import org.springframework.web.bind.annotation.RestController;
 import com.moneyapi.moneyapi.evento.RecursoAlteradoEvent;
 import com.moneyapi.moneyapi.evento.RecursoCriadoEvent;
 import com.moneyapi.moneyapi.model.Pessoa;
-import com.moneyapi.moneyapi.repository.Pessoas;
+import com.moneyapi.moneyapi.repository.PessoaRepository;
+import com.moneyapi.moneyapi.service.PessoaService;
 
 @RestController
 @RequestMapping("/pessoas")
-public class PessoaController {
+public class PessoaResource {
 
 	@Autowired
-	private Pessoas bd;
+	private PessoaRepository bd;
 	
 	@Autowired
 	private ApplicationEventPublisher publicador;
+	
+	@Autowired
+	private PessoaService pessoaService;
+	
 	
 	@GetMapping
 	public List<Pessoa> listar(){
@@ -66,13 +71,26 @@ public class PessoaController {
 	
 	@PutMapping("/{codigo}")
 	public ResponseEntity<Pessoa> alterar(@PathVariable Long codigo,@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-			
 		pessoa.setCodigo(codigo);
 		bd.saveAndFlush(pessoa);
 		publicador.publishEvent(new RecursoAlteradoEvent(this, response, pessoa.getCodigo()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(pessoa);
 	}
 	
+	
+	@PutMapping("/professor/{codigo}")
+	public ResponseEntity<Pessoa> alterarByProfessor(@PathVariable Long codigo,@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
+		Pessoa p = pessoaService.atualizar(codigo, pessoa);
+		publicador.publishEvent(new RecursoAlteradoEvent(this, response, p.getCodigo()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(p);
+	}
+	
+	
+	/**
+	 * Esse método eu fiz antes do professor
+	 * @param codigo
+	 * @param ativo
+	 */	
 	@PutMapping("/{codigo}/{ativo}")
 	public void alterarAtivo(@PathVariable Long codigo,@PathVariable boolean ativo) {
 		Optional<Pessoa> p = bd.findById(codigo);
@@ -83,5 +101,17 @@ public class PessoaController {
 		p.get().setAtivo(ativo);		
 		bd.saveAndFlush(p.get());
 	}
+	
+	/**
+	 * Esse está igual ao do professor
+	 * @param codigo
+	 * @param ativo
+	 */
+	@PutMapping("/{codigo}/ativo")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void atualizarPropriedadeAtivo(@PathVariable Long codigo,@RequestBody Boolean ativo) {
+		pessoaService.atualizarPropriedadeAtivo(codigo,ativo);		
+	}
+	
 	
 }

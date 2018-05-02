@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.moneyapi.moneyapi.evento.RecursoCriadoEvent;
 import com.moneyapi.moneyapi.model.Categoria;
-import com.moneyapi.moneyapi.repository.Categorias;
+import com.moneyapi.moneyapi.repository.CategoriaRepository;
 
 @RestController
 @RequestMapping("/categorias")
-public class CategoriaController {
+public class CategoriaResource {
 
 	@Autowired
-	private Categorias bd;
+	private CategoriaRepository bd;
 	@Autowired
 	private ApplicationEventPublisher publicador;
 	
