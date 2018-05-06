@@ -50,7 +50,7 @@ public class LancamentoResource {
 	}
 	
 	@GetMapping("/{codigo}")
-	public Optional<Lancamento> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
+	public Lancamento buscarPorCodigo(@PathVariable Long codigo) throws IOException {
 					
 		return service.buscarPorCodigo(codigo);
 	}

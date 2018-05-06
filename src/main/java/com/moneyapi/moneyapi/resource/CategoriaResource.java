@@ -46,9 +46,9 @@ public class CategoriaResource {
 	}
 	
 	@GetMapping("/{codigo}")
-	public Optional<Categoria> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
-		Optional<Categoria> retorno =  bd.findById(codigo);
-		if(retorno.equals(Optional.empty())) {					
+	public Categoria buscarPorCodigo(@PathVariable Long codigo) throws IOException {
+		Categoria retorno =  bd.findOne(codigo);
+		if(retorno == null) {					
 			ResponseEntity.notFound().build();
 		}		
 		

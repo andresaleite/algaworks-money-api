@@ -1,4 +1,4 @@
-package com.moneyapi.moneyapi;
+package com.moneyapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

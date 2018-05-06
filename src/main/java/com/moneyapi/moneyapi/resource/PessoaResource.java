@@ -55,9 +55,9 @@ public class PessoaResource {
 	}
 	
 	@GetMapping("/{codigo}")
-	public Optional<Pessoa> buscarPorCodigo(@PathVariable Long codigo) throws IOException {
-		Optional<Pessoa> retorno =  bd.findById(codigo);
-		if(retorno.equals(Optional.empty())) {					
+	public Pessoa buscarPorCodigo(@PathVariable Long codigo) throws IOException {
+		Pessoa retorno =  bd.findOne(codigo);
+		if(retorno == null) {					
 			ResponseEntity.notFound().build();
 		}				
 		return retorno;
@@ -66,7 +66,7 @@ public class PessoaResource {
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void remover(@PathVariable Long codigo) {
-		bd.deleteById(codigo);
+		bd.delete(codigo);
 	}
 	
 	@PutMapping("/{codigo}")
@@ -93,13 +93,13 @@ public class PessoaResource {
 	 */	
 	@PutMapping("/{codigo}/{ativo}")
 	public void alterarAtivo(@PathVariable Long codigo,@PathVariable boolean ativo) {
-		Optional<Pessoa> p = bd.findById(codigo);
-		if(p.equals(Optional.empty()))
+		Pessoa p = bd.findOne(codigo);
+		if(p == null)
 		throw new EmptyResultDataAccessException(1);
 		
-		p.get().setCodigo(codigo);
-		p.get().setAtivo(ativo);		
-		bd.saveAndFlush(p.get());
+		p.setCodigo(codigo);
+		p.setAtivo(ativo);		
+		bd.saveAndFlush(p);
 	}
 	
 	/**

@@ -32,9 +32,9 @@ public class LancamentoService {
 		return bd.filtrar(filtro,paginacao);
 	}
 	
-	public Optional<Lancamento> buscarPorCodigo(Long codigo) throws IOException {
-		Optional<Lancamento> retorno =  bd.findById(codigo);
-		if(retorno.equals(Optional.empty())) {					
+	public Lancamento buscarPorCodigo(Long codigo) throws IOException {
+		Lancamento retorno =  bd.findOne(codigo);
+		if(retorno == null) {					
 			ResponseEntity.notFound().build();
 		}				
 		return retorno;
@@ -49,7 +49,7 @@ public class LancamentoService {
 	}
 	
 	public void remover(Long codigo) {
-		bd.deleteById(codigo);
+		bd.delete(codigo);
 	}
 	
 	public void alterar(Long codigo,Lancamento lancamento) {
@@ -75,11 +75,11 @@ public class LancamentoService {
 	}
 
 	private Lancamento buscarLancamentoPorCodigo(Long codigo) {
-		Optional<Lancamento> pessoaSalva = bd.findById(codigo);
-		if(!pessoaSalva.isPresent()) {
+		Lancamento pessoaSalva = bd.findOne(codigo);
+		if(pessoaSalva == null) {
 			throw new EmptyResultDataAccessException(1);
 		}
-		return pessoaSalva.get();
+		return pessoaSalva;
 	}
 	
 

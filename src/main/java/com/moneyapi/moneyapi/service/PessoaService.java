@@ -33,11 +33,11 @@ public class PessoaService {
 	}
 
 	public Pessoa buscarPessoaPorCodigo(Long codigo) {
-		Optional<Pessoa> pessoaSalva = bd.findById(codigo);
+		Pessoa pessoaSalva = bd.findOne(codigo);
 		if(pessoaSalva == null) {
 			throw new EmptyResultDataAccessException(1);
 		}
-		return pessoaSalva.get();
+		return pessoaSalva;
 	}
 	
 
