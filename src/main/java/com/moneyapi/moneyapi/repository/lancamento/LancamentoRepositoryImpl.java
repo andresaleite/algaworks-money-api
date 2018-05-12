@@ -16,9 +16,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.moneyapi.moneyapi.model.Categoria_;
 import com.moneyapi.moneyapi.model.Lancamento;
 import com.moneyapi.moneyapi.model.Lancamento_;
+import com.moneyapi.moneyapi.model.Pessoa_;
 import com.moneyapi.moneyapi.repository.filter.LancamentoFilter;
+import com.moneyapi.moneyapi.repository.projection.ResumoLancamento;
 
 public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 
@@ -31,7 +34,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
 		CriteriaQuery<Lancamento> criteria = builder.createQuery(Lancamento.class);
 		Root<Lancamento> root = criteria.from(Lancamento.class);
-		Predicate[] predicado = CriarRestricoes(filtro,builder,root);
+		Predicate[] predicado = criarRestricoes(filtro,builder,root);
 		criteria.where(predicado);
 		
 		TypedQuery<Lancamento> query = manager.createQuery(criteria);
@@ -40,9 +43,29 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		return new PageImpl<>(query.getResultList(), paginacao, total(filtro));
 	}
 
-	
+	@Override
+	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<ResumoLancamento> criteria = builder.createQuery(ResumoLancamento.class);
+		Root<Lancamento> root = criteria.from(Lancamento.class);
+		
+		criteria.select(builder.construct(ResumoLancamento.class
+				, root.get(Lancamento_.codigo), root.get(Lancamento_.descricao)
+				, root.get(Lancamento_.dataVencimento), root.get(Lancamento_.dataPagamento)
+				, root.get(Lancamento_.valor), root.get(Lancamento_.tipoLancamento)
+				, root.get(Lancamento_.categoria).get(Categoria_.nome)
+				, root.get(Lancamento_.pessoa).get(Pessoa_.nome)));
+		
+		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
+		criteria.where(predicates);
+		
+		TypedQuery<ResumoLancamento> query = manager.createQuery(criteria);
+		adicionarRestricoesDePaginacao(query, pageable);
+		
+		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter));
+	}
 
-	private Predicate[] CriarRestricoes(LancamentoFilter filtro, CriteriaBuilder builder, Root<Lancamento> root) {
+	private Predicate[] criarRestricoes(LancamentoFilter filtro, CriteriaBuilder builder, Root<Lancamento> root) {
 
 		List<Predicate> restricoes = new ArrayList<>();
 		
@@ -68,7 +91,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
 		Root<Lancamento> root = criteria.from(Lancamento.class);
 		
-		Predicate[] predicados = CriarRestricoes(filtro, builder, root);
+		Predicate[] predicados = criarRestricoes(filtro, builder, root);
 		criteria.where(predicados);
 		
 		criteria.select(builder.count(root));
@@ -77,7 +100,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		return manager.createQuery(criteria).getSingleResult();
 	}
 
-	private void adicionarRestricoesDePaginacao(TypedQuery<Lancamento> query, Pageable paginacao) {
+	private void adicionarRestricoesDePaginacao(TypedQuery<?> query, Pageable paginacao) {
 		int paginaAtual = paginacao.getPageNumber();
 		int totalPorPagina = paginacao.getPageSize();
 		int primeiroRegistroDaPagina = paginaAtual * totalPorPagina;
@@ -86,4 +109,9 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		query.setMaxResults(totalPorPagina);		
 		
 	}
+
+
+
+
+	
 }

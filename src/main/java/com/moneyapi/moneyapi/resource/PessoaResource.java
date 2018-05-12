@@ -1,17 +1,13 @@
 package com.moneyapi.moneyapi.resource;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.moneyapi.moneyapi.evento.RecursoAlteradoEvent;
 import com.moneyapi.moneyapi.evento.RecursoCriadoEvent;
 import com.moneyapi.moneyapi.model.Pessoa;
 import com.moneyapi.moneyapi.repository.PessoaRepository;
@@ -33,85 +28,48 @@ import com.moneyapi.moneyapi.service.PessoaService;
 public class PessoaResource {
 
 	@Autowired
-	private PessoaRepository bd;
-	
-	@Autowired
-	private ApplicationEventPublisher publicador;
+	private PessoaRepository pessoaRepository;
 	
 	@Autowired
 	private PessoaService pessoaService;
 	
-	
-	@GetMapping
-	public List<Pessoa> listar(){
-		return bd.findAll();
-	}
-	
-	@PostMapping	
+	@Autowired
+	private ApplicationEventPublisher publisher;
+
+	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
 	public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-		Pessoa retorno = bd.save(pessoa);
-		publicador.publishEvent(new RecursoCriadoEvent(this, response, pessoa.getCodigo()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(retorno);
+		Pessoa pessoaSalva = pessoaRepository.save(pessoa);
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoaSalva.getCodigo()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(pessoaSalva);
 	}
-	
+
 	@GetMapping("/{codigo}")
-	public Pessoa buscarPorCodigo(@PathVariable Long codigo) throws IOException {
-		Pessoa retorno =  bd.findOne(codigo);
-		if(retorno == null) {					
-			ResponseEntity.notFound().build();
-		}				
-		return retorno;
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
+	public ResponseEntity<Pessoa> buscarPeloCodigo(@PathVariable Long codigo) {
+		Pessoa pessoa = pessoaRepository.findOne(codigo);
+		return pessoa != null ? ResponseEntity.ok(pessoa) : ResponseEntity.notFound().build();
 	}
 	
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_PESSOA') and #oauth2.hasScope('write')")
 	public void remover(@PathVariable Long codigo) {
-		bd.delete(codigo);
+		pessoaRepository.delete(codigo);
 	}
 	
 	@PutMapping("/{codigo}")
-	public ResponseEntity<Pessoa> alterar(@PathVariable Long codigo,@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-		pessoa.setCodigo(codigo);
-		bd.saveAndFlush(pessoa);
-		publicador.publishEvent(new RecursoAlteradoEvent(this, response, pessoa.getCodigo()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(pessoa);
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
+	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @Valid @RequestBody Pessoa pessoa) {
+		Pessoa pessoaSalva = pessoaService.atualizar(codigo, pessoa);
+		return ResponseEntity.ok(pessoaSalva);
 	}
 	
-	
-	@PutMapping("/professor/{codigo}")
-	public ResponseEntity<Pessoa> alterarByProfessor(@PathVariable Long codigo,@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
-		Pessoa p = pessoaService.atualizar(codigo, pessoa);
-		publicador.publishEvent(new RecursoAlteradoEvent(this, response, p.getCodigo()));
-		return ResponseEntity.status(HttpStatus.CREATED).body(p);
-	}
-	
-	
-	/**
-	 * Esse método eu fiz antes do professor
-	 * @param codigo
-	 * @param ativo
-	 */	
-	@PutMapping("/{codigo}/{ativo}")
-	public void alterarAtivo(@PathVariable Long codigo,@PathVariable boolean ativo) {
-		Pessoa p = bd.findOne(codigo);
-		if(p == null)
-		throw new EmptyResultDataAccessException(1);
-		
-		p.setCodigo(codigo);
-		p.setAtivo(ativo);		
-		bd.saveAndFlush(p);
-	}
-	
-	/**
-	 * Esse está igual ao do professor
-	 * @param codigo
-	 * @param ativo
-	 */
 	@PutMapping("/{codigo}/ativo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void atualizarPropriedadeAtivo(@PathVariable Long codigo,@RequestBody Boolean ativo) {
-		pessoaService.atualizarPropriedadeAtivo(codigo,ativo);		
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
+	public void atualizarPropriedadeAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
+		pessoaService.atualizarPropriedadeAtivo(codigo, ativo);
 	}
-	
-	
+
 }
