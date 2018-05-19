@@ -8,7 +8,7 @@ public class MoneyApiProperty {
 	private String originPermitida = "https://localhost:8000";
 	private final Seguranca seguranca = new Seguranca();
 	public static class Seguranca{
-		private boolean enableHttps;
+		private boolean enableHttps; 
 
 		public boolean isEnableHttps() {
 			return enableHttps;
