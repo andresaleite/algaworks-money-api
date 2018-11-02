@@ -42,7 +42,7 @@ public class LancamentoService {
 	
 	public Lancamento salvar(Lancamento lancamento) {
 		Pessoa pessoa = pessoaService.buscarPessoaPorCodigo(lancamento.getPessoa().getCodigo());
-		if(pessoa == null || pessoa.isInativo()) {
+		if(pessoa == null || !pessoa.isAtivo()) {
 			throw new PessoaInexistenteOuInativaException();			
 		}
 		return bd.save(lancamento);
@@ -52,35 +52,25 @@ public class LancamentoService {
 		bd.delete(codigo);
 	}
 	
-	public void alterar(Long codigo,Lancamento lancamento) {
-		lancamento.setCodigo(codigo);
-		bd.saveAndFlush(lancamento);
+	public Lancamento alterar(Long codigo, Lancamento lancamento) {
+		Lancamento lancamentoSalvo = buscarLancamentoPorCodigo(codigo);
+		Pessoa pessoa = pessoaService.buscarPessoaPorCodigo(lancamento.getPessoa().getCodigo());
+		if(!pessoa.isAtivo()) {
+			throw new PessoaInexistenteOuInativaException();
+		}
+		BeanUtils.copyProperties(lancamento, lancamentoSalvo, "codigo");
 		
-	}
-	
-	public Lancamento atualizar(Long codigo, Lancamento pessoa) {
-		Lancamento pessoaSalva = buscarLancamentoPorCodigo(codigo);
-		
-		BeanUtils.copyProperties(pessoa, pessoaSalva, "codigo");
-		
-		return bd.save(pessoaSalva);
-	}
-
-
-	public void atualizarPropriedadeAtivo(Long codigo, Boolean ativo) {
-		/*Optional<Lancamento> pessoaSalva = buscarLancamentoPorCodigo(codigo);
-		pessoaSalva.get().setAtivo(ativo);
-		bd.save(pessoaSalva);*/
-		
+		return bd.saveAndFlush(lancamentoSalvo);
 	}
 
 	private Lancamento buscarLancamentoPorCodigo(Long codigo) {
-		Lancamento pessoaSalva = bd.findOne(codigo);
-		if(pessoaSalva == null) {
+		Lancamento lancamentoSalvo = bd.findOne(codigo);
+		if(lancamentoSalvo == null) {
 			throw new EmptyResultDataAccessException(1);
 		}
-		return pessoaSalva;
+		return lancamentoSalvo;
 	}
+	
 	
 
 }

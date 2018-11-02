@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.moneyapi.moneyapi.evento.RecursoCriadoEvent;
 import com.moneyapi.moneyapi.exceptionhandler.MoneyApiExceptionHandler.Erro;
 import com.moneyapi.moneyapi.model.Lancamento;
+import com.moneyapi.moneyapi.model.Pessoa;
 import com.moneyapi.moneyapi.repository.LancamentoRepository;
 import com.moneyapi.moneyapi.repository.filter.LancamentoFilter;
 import com.moneyapi.moneyapi.repository.projection.ResumoLancamento;
@@ -90,6 +92,13 @@ public class LancamentoResource {
 	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('write')")
 	public void remover(@PathVariable Long codigo) {
 		lancamentoRepository.delete(codigo);
+	}
+	
+	@PutMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_ALTERAR_LANCAMENTO') and #oauth2.hasScope('write')")
+	public ResponseEntity<Lancamento> alterar(@PathVariable Long codigo, @Valid @RequestBody Lancamento lancamento) {
+		Lancamento lancamentoSalvo = lancamentoService.alterar(codigo, lancamento);
+		return ResponseEntity.ok(lancamentoSalvo);
 	}
 	
 }

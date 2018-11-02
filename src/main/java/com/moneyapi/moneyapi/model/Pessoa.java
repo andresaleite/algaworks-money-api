@@ -31,11 +31,6 @@ public class Pessoa {
 	private Endereco endereco;
 	
 
-	@JsonIgnore
-	@Transient
-	public Boolean isInativo() {
-		return !this.ativo;
-	}
 	
 	public Long getCodigo() {
 		return codigo;
@@ -93,6 +88,8 @@ public class Pessoa {
 	public void setAtivo(boolean ativo) {
 		this.ativo = ativo;
 	}
+
+	
 	 
 	 
 	
