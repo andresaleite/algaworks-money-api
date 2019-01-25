@@ -27,8 +27,7 @@ public class TokenResource {
 		cookie.setHttpOnly(true);
 		cookie.setSecure(moneyApiProperty.getSeguranca().isEnableHttps()); 
 		cookie.setPath(req.getContextPath() + "/oauth/token");
-		cookie.setMaxAge(0);
-		
+		cookie.setMaxAge(0);	
 		resp.addCookie(cookie);
 		resp.setStatus(HttpStatus.NO_CONTENT.value());
 	}
