@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("moneyapi")
 public class MoneyApiProperty {
 
-	private String originPermitida = "https://localhost:8000";
+	private String originPermitida = "https://desa-money-api.herokuapp.com";
 	private final Seguranca seguranca = new Seguranca();
 	public static class Seguranca{
 		private boolean enableHttps; 
