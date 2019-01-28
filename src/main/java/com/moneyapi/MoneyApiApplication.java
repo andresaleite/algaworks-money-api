@@ -24,7 +24,7 @@ public class MoneyApiApplication {
 	        return new WebMvcConfigurerAdapter() {
 	            @Override
 	            public void addCorsMappings(CorsRegistry registry) {
-	                registry.addMapping("/greeting-javaconfig").allowedOrigins("http://localhost:9000");
+	                registry.addMapping("/greeting-javaconfig").allowedOrigins("https://desa-money-ui.herokuapp.com");
 	            }
 	        };
 	    }
