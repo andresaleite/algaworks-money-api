@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.money-api</groupId>
-	<artifactId>money-api</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<groupId>com.estancia-api</groupId>
+	<artifactId>estancia-api</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>money-api</name>
-	<description>teste</description>
+	<name>estancia-api</name>
+	<description>Estancia Quintas da Alvorada - Somos Todos Estancia</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
